@@ -1,13 +1,10 @@
-# Configure SSH client
+# Configure SSH client authentication
 
-file_line { 'Declare identity file':
-  ensure => present,
-  path   => '/etc/ssh/ssh_config',
-  line   => '    IdentityFile ~/.ssh/school',
-}
-
-file_line { 'Turn off passwd auth':
-  ensure => present,
-  path   => '/etc/ssh/ssh_config',
-  line   => '    PasswordAuthentication no',
+augeas { 'ssh_config_identityfile':
+  context => '/files/etc/ssh/ssh_config',
+  changes => [
+    'set Host/*/IdentityFile ~/.ssh/school',
+    'set Host/*/PasswordAuthentication no',
+  ],
+  onlyif  => 'match Host/* size == 0',
 }
