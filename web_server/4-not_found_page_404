@@ -2,15 +2,29 @@
 # Installs nginx, serves "Holberton School", redirects /redirect_me,
 # and configures a custom 404 page
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt-get update -y
 apt-get install -y nginx
 
-echo "Holberton School" > /var/www/html/index.nginx-debian.html
+echo "Holberton School" > /var/www/html/index.html
 echo "Ceci n'est pas une page" > /var/www/html/404.html
 
-sed -i '/listen 80 default_server;/a \\trewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
-
-sed -i '/listen 80 default_server;/a \\terror_page 404 /404.html;' /etc/nginx/sites-available/default
+tee /etc/nginx/sites-available/default > /dev/null <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html;
+    error_page 404 /404.html;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+}
+EOF
 
 service nginx start
 service nginx restart
