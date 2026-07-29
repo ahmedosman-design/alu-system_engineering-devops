@@ -1,10 +1,19 @@
-# Configure SSH client authentication
+# Using puppet
+# 1. Your SSH client configuration must be configured to use the private key ~/.ssh/school
+# 2. Your SSH client configuration must be configured to refuse to authenticate using a password
 
-augeas { 'ssh_config_identityfile':
-  context => '/files/etc/ssh/ssh_config',
-  changes => [
-    'set Host/*/IdentityFile ~/.ssh/school',
-    'set Host/*/PasswordAuthentication no',
-  ],
-  onlyif  => 'match Host/* size == 0',
+include stdlib
+
+file_line { 'Refuse auth with password':
+  ensure => present,
+  path    => '/etc/ssh/ssh_config',
+  line    => '    PasswordAuthentication no',
+  replace => true,
+}
+
+file_line { 'specify identity file path':
+  ensure  => present,
+  path    => '/etc/ssh/ssh_config',
+  line    => '     IdentityFile ~/.ssh/school',
+  replace => true,
 }
